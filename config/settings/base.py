@@ -173,11 +173,11 @@ if DB_ENGINE == "mysql":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
-            "HOST": config("DB_HOST", "127.0.0.1"),
-            "PORT": config("DB_PORT", "3306"),
-            "NAME": config("DB_NAME", "clinicops_db"),
-            "USER": config("DB_USER", "clinicops_user"),
-            "PASSWORD": config("DB_PASSWORD", "clinicops_password"),
+            "HOST": config("MYSQL_HOST", "127.0.0.1"),
+            "PORT": config("MYSQL_PORT", "3306"),
+            "NAME": config("MYSQL_DB", "clinicops_db"),
+            "USER": config("MYSQL_USER", "clinicops_user"),
+            "PASSWORD": config("MYSQL_PASSWORD", "clinicops_password"),
             "OPTIONS": {
                 "charset": "utf8mb4",
             },

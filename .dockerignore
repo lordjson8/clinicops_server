@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv
+venv/
+ENV/
+.eggs/
+*.egg-info/
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker
+Dockerfile*
+docker-compose*
+.docker/
+
+# Documentation
+*.md
+!README.md
+
+# Local files
+.env
+.env.*
+!.env.example
+*.log
+*.sqlite3
+
+# Static files (collected separately)
+staticfiles/
+media/
+
+# CI/CD
+.github/
+.gitlab-ci.yml

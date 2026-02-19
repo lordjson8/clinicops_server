@@ -1,0 +1,87 @@
+# render.yaml
+services:
+  # 1. PostgreSQL Database
+  - type: pserv
+    name: postgres
+    runtime: postgres
+    postgres:
+      version: "14"
+
+  # 2. Redis Instance
+  - type: pserv
+    name: redis
+    runtime: redis
+
+  # 3. Django Web Service (Gunicorn + WhiteNoise)
+  - type: web
+    name: web
+    runtime: docker
+    docker:
+      dockerfilePath: ./docker/prod/Dockerfile
+    # preDeployCommand is run before each deploy. 
+    # Perfect for migrations and collecting static files.
+    preDeployCommand: "python manage.py migrate --noinput && python manage.py collectstatic --noinput"
+    healthCheck:
+      path: /health/
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: pserv
+          name: redis
+          property: connectionString
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: WEB_CONCURRENCY # Used by Gunicorn
+        value: 4
+      # --- Add other secrets here ---
+      # - key: SECRET_KEY
+      #   generateValue: true
+      # - key: DEBUG
+      #   value: "False"
+
+  # 4. Celery Worker
+  - type: worker
+    name: celery-worker
+    runtime: docker
+    docker:
+      dockerfilePath: ./docker/prod/Dockerfile
+    command: "celery -A config worker --loglevel=info"
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: pserv
+          name: redis
+          property: connectionString
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+
+  # 5. Celery Beat (Scheduler)
+  - type: worker
+    name: celery-beat
+    runtime: docker
+    docker:
+      dockerfilePath: ./docker/prod/Dockerfile
+    command: "celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: pserv
+          name: redis
+          property: connectionString
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production

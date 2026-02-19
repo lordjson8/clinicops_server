@@ -1,0 +1,62 @@
+# Django & DRF
+Django==5.0.1
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.1
+django-filter==23.2
+
+# Environment variables
+python-decouple==3.8
+python-dotenv==1.0.0
+
+
+# API documentation
+drf-spectacular==0.29.0
+drf-spectacular[sidecar]
+
+# Database
+# mysqlclient==2.2.1
+psycopg2-binary==2.9.9  # Alternative: PostgreSQL for py <= 3.12
+# py 3.13
+# psycopg[binary]>=3.1 # Alternative: PostgreSQL for py >= 3.13
+
+
+# Security
+django-cors-headers==4.3.1
+django-ratelimit==4.1.0
+cryptography==42.0.0
+PyJWT==2.8.0
+argon2-cffi==23.1.0
+bcrypt==4.1.2
+pyotp==2.9.0
+
+
+# Logging and monitoring
+# sentry-sdk==1.5.0
+django-extensions==3.2.3
+
+phonenumbers==8.13.27
+django-phonenumber-field==7.3.0
+
+
+
+# Background Tasks & Messaging (Celery)
+celery==5.5.3
+amqp==5.3.1
+kombu==5.5.4
+billiard==4.2.2
+vine==5.1.0
+django_celery_results==2.6.0
+django-celery-beat==2.8.1
+
+
+# Caching, Sessions & Queues
+redis==6.4.0
+django-redis==6.0.0
+
+# Image & Media Processing
+pillow==12.0.0
+
+
+# Device & Client Detection
+device_detector==5.0.1
+

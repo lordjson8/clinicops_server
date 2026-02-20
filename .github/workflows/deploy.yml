@@ -132,8 +132,24 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Deploy to Railway
-        run: railway up --detach --service ${{ secrets.RAILWAY_SERVICE_NAME }}
+      # Deploy each service in your Railway project.
+      # They all use the same Dockerfile but different start commands.
+      # Replace the service names below with YOUR actual service names from Railway.
+
+      - name: Deploy Web Service
+        run: railway up --detach --service web
         env:
           RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
           RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+
+      # - name: Deploy Celery Worker
+      #   run: railway up --detach --service celery-worker
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
+      #     RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+
+      # - name: Deploy Celery Beat
+      #   run: railway up --detach --service celery-beat
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
+      #     RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}

@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy requirements and build wheels
 COPY requirements/ ./requirements/
-RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels \
+RUN pip wheel --no-cache-dir --wheel-dir /app/wheels \
     -r requirements/production.txt
 
 
@@ -58,7 +58,9 @@ RUN pip install --no-cache /wheels/*
 COPY --chown=clinicops:clinicops . .
 
 # Collect static files at build time (faster deploys)
-RUN SECRET_KEY=build-placeholder ENV=production \
+# We use dummy values because Django needs these to start, but collectstatic
+# doesn't actually connect to a database — it just copies files.
+RUN SECRET_KEY=build-placeholder ENV=production DB_ENGINE=sqlite3 \
     python manage.py collectstatic --noinput
 
 # Switch to non-root user

@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install Python dependencies
 COPY requirements/ ./requirements/
-RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements/production.txt
+RUN pip wheel --no-cache-dir --wheel-dir /app/wheels -r requirements/production.txt
 
 # ============================================
 # Stage 2: Production

@@ -72,11 +72,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     DJANGO_SETTINGS_MODULE=config.settings.production \
     ENV=production
 
-EXPOSE 8000
+EXPOSE ${PORT:-8000}
 
-# Railway uses this to check if your app is healthy
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/health/ || exit 1
+# Railway uses its own health check (configured in railway.toml).
+# We remove the Docker HEALTHCHECK to avoid conflicts with Railway's port.
 
 # Default command: run Django with Gunicorn
 # Railway can override this for worker/beat services

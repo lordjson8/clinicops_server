@@ -142,15 +142,14 @@ jobs:
           RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
           RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
 
+      - name: Deploy Celery Worker
+        run: railway up --detach --service celery-worker
+        env:
+          RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
 
-      # - name: Deploy Celery Worker
-      #   run: railway up --detach --service celery-worker
-      #   env:
-      #     RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
-      #     RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
-
-      # - name: Deploy Celery Beat
-      #   run: railway up --detach --service celery-beat
-      #   env:
-      #     RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
-      #     RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+      - name: Deploy Celery Beat
+        run: railway up --detach --service celery-beat
+        env:
+          RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}

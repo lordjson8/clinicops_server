@@ -11,7 +11,7 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 # Railway hits this URL to check if your app is alive
-healthcheckPath = "/health/"
+#healthcheckPath = "/health/"
 # Wait up to 5 minutes for the app to start (migrations can be slow)
 healthcheckTimeout = 300
 # How many instances to keep running (1 is fine for most projects)

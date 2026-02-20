@@ -133,11 +133,11 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Link to Railway project
-        run: railway link ${{ secrets.RAILWAY_PROJECT_ID }}
+        run: railway link ${{ secrets.ID }}
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
 
       - name: Deploy to Railway
         run: railway up --detach
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_TOKEN: ${{ secrets.ACTIONS }}

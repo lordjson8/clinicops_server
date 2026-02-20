@@ -2,28 +2,35 @@ from .base import *
 import dj_database_url
 from decouple import config
 
-print("prod")
-
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 
-# https://docs.djangoproject.com/en/5.0/ref/middleware/#x-forwarded-proto-proxy-ssl-header
+# --- Security ---
+# Railway (and most cloud platforms) sit behind a reverse proxy that handles SSL.
+# This tells Django to trust the X-Forwarded-Proto header from the proxy.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # --- Database ---
-# Render provides a DATABASE_URL. If it's not present, we fall back to base.py settings.
-# db_from_env = dj_database_url.config(conn_max_age=600)
-# if db_from_env:
-    # DATABASES['default'].update(db_from_env)
+# Railway provides a DATABASE_URL environment variable when you add a PostgreSQL plugin.
+# dj-database-url parses it into the format Django expects.
+# If DATABASE_URL is not set, it falls back to the base.py settings (individual vars).
+db_from_env = dj_database_url.config(conn_max_age=600)
+if db_from_env:
+    DATABASES = {'default': db_from_env}
 
+# --- Static Files ---
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 LOGGING = {
     'version': 1,

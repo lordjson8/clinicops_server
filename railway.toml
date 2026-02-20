@@ -1,0 +1,21 @@
+# =============================================================================
+# Railway Configuration
+#
+# This file tells Railway HOW to build and run your app.
+# Railway reads this automatically from your repo root.
+# =============================================================================
+
+[build]
+# Use the Dockerfile at the repo root
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Railway hits this URL to check if your app is alive
+healthcheckPath = "/health/"
+# Wait up to 5 minutes for the app to start (migrations can be slow)
+healthcheckTimeout = 300
+# How many instances to keep running (1 is fine for most projects)
+numReplicas = 1
+# Restart the app if it crashes
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5

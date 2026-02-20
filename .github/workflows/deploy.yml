@@ -1,0 +1,138 @@
+# =============================================================================
+# GitHub Actions CI/CD Pipeline
+#
+# HOW THIS WORKS:
+# 1. You push code to GitHub (to the "master" branch)
+# 2. GitHub sees this file and automatically runs the jobs below
+# 3. First job: "test" — runs your Django tests in a fresh container
+# 4. Second job: "deploy" — if tests pass, tells Railway to deploy
+#
+# WHAT YOU NEED TO SET UP:
+# Go to your GitHub repo → Settings → Secrets and variables → Actions
+# Add these secrets:
+#   - RAILWAY_TOKEN: Your Railway API token (get it from railway.app/account/tokens)
+# =============================================================================
+
+name: Test & Deploy to Railway
+
+# WHEN does this run?
+on:
+  push:
+    branches: [master]       # Deploy on push to master
+  pull_request:
+    branches: [master]       # Run tests (but don't deploy) on PRs
+
+# WHAT does it do?
+jobs:
+
+  # =========================================================================
+  # JOB 1: TEST
+  # Spins up PostgreSQL + Redis, installs your app, runs tests
+  # =========================================================================
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    # These are temporary services that GitHub spins up just for testing
+    services:
+      # A temporary PostgreSQL database for tests
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: clinicops_test_db
+          POSTGRES_USER: clinicops_test_user
+          POSTGRES_PASSWORD: clinicops_test_password
+        ports:
+          - 5432:5432
+        # Wait until PostgreSQL is ready before running tests
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      # A temporary Redis instance for tests
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    # Environment variables available to your test commands
+    env:
+      ENV: test
+      DB_ENGINE: postgresql
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: clinicops_test_db
+      POSTGRES_USER: clinicops_test_user
+      POSTGRES_PASSWORD: clinicops_test_password
+      REDIS_URL: redis://localhost:6379/0
+      CELERY_BROKER_URL: redis://localhost:6379/0
+      CELERY_RESULT_BACKEND: redis://localhost:6379/0
+      SECRET_KEY: test-secret-key-not-for-production
+
+    steps:
+      # Step 1: Download your code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Install Python
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Step 3: Cache pip packages (so they don't re-download every time)
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/base.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # Step 4: Install system dependencies for PostgreSQL driver
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpq-dev
+
+      # Step 5: Install Python packages
+      - name: Install Python dependencies
+        run: pip install -r requirements/base.txt
+
+      # Step 6: Run database migrations
+      - name: Run migrations
+        run: python manage.py migrate --noinput
+
+      # Step 7: Run your tests
+      - name: Run tests
+        run: python manage.py test --verbosity=2
+
+  # =========================================================================
+  # JOB 2: DEPLOY
+  # Only runs if tests pass AND it's a push to master (not a PR)
+  # =========================================================================
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    needs: test                    # Wait for tests to pass first
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Install the Railway CLI and trigger a deploy
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

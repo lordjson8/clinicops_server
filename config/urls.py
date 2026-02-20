@@ -26,11 +26,9 @@ def health_check(request):
 
 
 urlpatterns = [
-    # Health check — Railway hits this to know your app is alive
     path('health/', health_check, name='health-check'),
 
-    # path('admin/', admin.site.urls),
-
+   
     # API v1
     path('api/v1/auth/', include('apps.accounts.urls')),
     path('api/v1/clinic/', include('apps.clinics.urls')),
@@ -45,13 +43,16 @@ urlpatterns = [
     path('api/v1/audit/', include('apps.audit.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += [
-        path('admin/', admin.site.urls),
-        # YOUR PATTERNS
-        path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-        # Optional UI:
-        path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-        path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-        path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    ]
+# if settings.DEBUG:
+
+# i removed this line because it was causing the swagger docs to not load in production, but you can uncomment it if you want to only load the swagger docs in development
+
+urlpatterns += [
+    path('admin/', admin.site.urls),
+    # YOUR PATTERNS
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    # Optional UI:
+    path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+]

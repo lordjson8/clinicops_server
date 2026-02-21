@@ -1,28 +1,31 @@
-FROM python:3.12.2-slim
+    FROM python:3.12.2-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+    ENV PYTHONDONTWRITEBYTECODE=1 \
+        PYTHONUNBUFFERED=1 \
+        PIP_NO_CACHE_DIR=1
 
-WORKDIR /app
+    WORKDIR /app
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    pkg-config && \
-    rm -rf /var/lib/apt/lists/*
+    RUN apt-get update && \
+        apt-get install -y --no-install-recommends \
+        build-essential \
+        libpq-dev \
+        pkg-config && \
+        rm -rf /var/lib/apt/lists/*
 
-RUN useradd -m appuser
+    RUN useradd -m appuser
 
-COPY requirements /app/requirements
-ARG REQUIREMENTS_FILE=requirements/development.txt
+    COPY requirements /app/requirements
+    ARG REQUIREMENTS_FILE=requirements/development.txt
 
-RUN pip install --no-cache-dir -r ${REQUIREMENTS_FILE}
+    RUN pip install --no-cache-dir -r ${REQUIREMENTS_FILE}
 
-COPY . /app/
+    COPY . /app/
 
-RUN chown -R appuser:appuser /app
-USER appuser
+    RUN sed -i 's/\r$//' /app/docker/dev/entrypoint.sh && \
+        chmod +x /app/docker/dev/entrypoint.sh
 
-EXPOSE 8000
+    RUN chown -R appuser:appuser /app
+    USER appuser
+
+    EXPOSE 8000

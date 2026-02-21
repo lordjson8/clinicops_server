@@ -1,52 +1,40 @@
-# ============================================
-# Stage 1: Builder
-# ============================================
 FROM python:3.11-slim as builder
 
 WORKDIR /app
 
-# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
 COPY requirements/ ./requirements/
 RUN pip wheel --no-cache-dir --wheel-dir /app/wheels -r requirements/production.txt
 
-# ============================================
-# Stage 2: Production
-# ============================================
 FROM python:3.11-slim as production
 
-# Create non-root user
 RUN groupadd -r clinicops && useradd -r -g clinicops clinicops
 
 WORKDIR /app
 
-# Install runtime dependencies only
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     curl \
     netcat-traditional \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy wheels from builder
 COPY --from=builder /app/wheels /wheels
 RUN pip install --no-cache /wheels/*
 
-# Copy application code
 COPY --chown=clinicops:clinicops . .
 
-# Copy and set entrypoint
-COPY --chown=clinicops:clinicops entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Create staticfiles directory with correct ownership before switching user
+RUN mkdir -p /app/staticfiles && chown -R clinicops:clinicops /app/staticfiles
 
-# Switch to non-root user
+COPY --chown=clinicops:clinicops docker/prod/entrypoint.sh /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
+
 USER clinicops
 
-# Environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DJANGO_SETTINGS_MODULE=config.settings.production

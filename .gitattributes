@@ -1,0 +1,5 @@
+# .gitattributes
+* text=auto
+docker/dev/entrypoint.sh text eol=lf
+docker/prod/entrypoint.sh text eol=lf
+*.sh text eol=lf

@@ -1,0 +1,242 @@
+{
+	"info": {
+		"_postman_id": "fb53ac83-1612-4126-8106-779b7edae0c1",
+		"name": "ClinicOps_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40673879"
+	},
+	"item": [
+		{
+			"name": "Auth & Profile",
+			"item": [
+				{
+					"name": "Login",
+					"protocolProfileBehavior": {
+						"followRedirects": true,
+						"disableUrlEncoding": false,
+						"disableCookies": false
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "User-Agent",
+								"value": "insomnia/12.0.0"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"phone\" : \"{{ _.phone }}\",\n\t\"password\" : \"{{ _.password }}\",\n\t\"remember_me\" : true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{ _.auth_base_url }}/login/",
+							"host": [
+								"{{ _.auth_base_url }}"
+							],
+							"path": [
+								"login",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"protocolProfileBehavior": {
+						"followRedirects": true,
+						"disableUrlEncoding": false,
+						"disableCookies": false
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "User-Agent",
+								"value": "insomnia/12.0.0"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"clinic\": {\n\t\t\"name\" : \"test\",\n\t\t\"phone\": \"{{ _.phone }}3\"\n\t},\n\t\"admin\": {\n\t\t\"firstName\": \"test\",\n\t\t\"lastName\": \"test\",\n\t\t\"phone\": \"{{ _.phone }}3\",\n\t\t\"password\": \"{{ _.password }}\",\n\t\t\"passwordConfirm\" : \"{{ _.password }}\"\n\t}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{ _.auth_base_url }}/register/",
+							"host": [
+								"{{ _.auth_base_url }}"
+							],
+							"path": [
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "CookieCheck",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"description": "Check if cookie was well removed"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Me",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"description": "Get current user"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Me Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"description": "Get current user"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "health",
+			"protocolProfileBehavior": {
+				"followRedirects": true,
+				"disableUrlEncoding": false,
+				"disableCookies": false
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "insomnia/12.0.0"
+					}
+				],
+				"url": {
+					"raw": "{{ _.host }}/health/",
+					"host": [
+						"{{ _.host }}"
+					],
+					"path": [
+						"health",
+						""
+					]
+				},
+				"description": "Endpoint to ensure the api is running"
+			},
+			"response": []
+		},
+		{
+			"name": "Docs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"description": "Endpoint to view swagger docs"
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					"console.log(\"Preparing your request \",pm.request.url)"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": ""
+		},
+		{
+			"key": "base_url",
+			"value": ""
+		},
+		{
+			"key": "admin_phone",
+			"value": ""
+		},
+		{
+			"key": "admin_password",
+			"value": ""
+		},
+		{
+			"key": "clinic_id",
+			"value": ""
+		},
+		{
+			"key": "access_token",
+			"value": ""
+		},
+		{
+			"key": "refresh_token",
+			"value": ""
+		}
+	]
+}

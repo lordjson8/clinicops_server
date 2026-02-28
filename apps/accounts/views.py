@@ -15,6 +15,7 @@ from .serializers import (
     UserSerializer,
     RegisterSerializer,
     TokenSerializer,
+    UpdateProfileSerializer,
     ClinicRegistrationSerializer,
     AdminRegistrationSerializer,
 )
@@ -51,6 +52,10 @@ def _build_refresh_token(user,remember_me = False):
     return refresh
 
 class LoginView(GenericAPIView):
+    
+    """
+    Endpoint to authenticate registered user
+    """
     permission_classes = [AllowAny]
     throttle_classes = [LoginThrottle]
     serializer_class = LoginSerializer
@@ -129,6 +134,10 @@ class RegisterView(GenericAPIView):
     throttle_classes = [RegisterThrottle]
     serializer_class = RegisterSerializer
 
+    """
+    Endpoint to register clinic owner and the clinic
+    """
+
     def post(self,request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -179,6 +188,13 @@ class RegisterView(GenericAPIView):
 
 
 class LogoutView(GenericAPIView):
+    """
+    Endpoint to logout authenticated users, using refresh token through cookies 
+    or refresh token through payload
+    {
+       "refresh" : "" //optional if cookie given
+    } 
+    """
     permission_classes = [IsAuthenticated]
     serializer_class = TokenSerializer
     def post(self,request):
@@ -212,6 +228,10 @@ class LogoutView(GenericAPIView):
     
 class CheckCookieDeletion(GenericAPIView):
     permission_classes = [AllowAny]
+
+    """
+    Endpoint for testing if cookies where deleted after sucessfull login
+    """
     
     def post(self,request):
         try:
@@ -233,6 +253,14 @@ class CheckCookieDeletion(GenericAPIView):
 class RefreshTokenView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = TokenSerializer
+
+    """
+    Endpoint to refresh tokens, using refresh token through cookies 
+    or refresh token through payload
+    {
+       "refresh" : "" //optional if cookie given
+    } 
+    """
 
     def post(self, request):
         cookie_refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
@@ -282,3 +310,38 @@ class RefreshTokenView(GenericAPIView):
             )
             _delete_refresh_cookie(response)
             return response
+
+
+
+class MeView(GenericAPIView):
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateProfileSerializer
+
+    
+
+    def get(self, request):
+        return Response(UserSerializer(request.user).data)
+
+    def patch(self, request):
+        serializer = UpdateProfileSerializer(
+            data=request.data,
+            context={'request': request},
+        )
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+        data = serializer.validated_data
+
+        if 'firstName' in data:
+            user.first_name = data['firstName']
+        if 'lastName' in data:
+            user.last_name = data['lastName']
+        if 'phone' in data:
+            user.phone = data['phone']
+        if 'email' in data:
+            user.email = data['email']
+
+        user.save()
+        return Response(UserSerializer(user).data)
+

@@ -11,12 +11,11 @@ class LoginThrottle(SimpleRateThrottle):
     scope = 'login'
     def get_cache_key(self, request, view):
 
-        # return self.cache_format % {
-        #     'scope': self.scope,
-        #     'ident' : self.get_ident(request),
-        # }
-        return super().get_cache_key(request, view)
-
+        return self.cache_format % {
+            'scope': self.scope,
+            'ident' : self.get_ident(request),
+        }
+        
 class RegisterThrottle(SimpleRateThrottle):
     """
     Docstring for RegisterThrottle
@@ -28,12 +27,11 @@ class RegisterThrottle(SimpleRateThrottle):
     scope = 'register'
 
     def get_cache_key(self, request, view):
-        # return self.cache_format % {
-        #     'scope': self.scope,
-        #     'ident': self.get_ident(request)
-        # }
-        return super().get_cache_key(request, view)
-
+        return self.cache_format % {
+            'scope': self.scope,
+            'ident': self.get_ident(request)
+        }
+        
 class SMSThrottle(SimpleRateThrottle):
     """
     Docstring for SMSThrottle
@@ -44,8 +42,8 @@ class SMSThrottle(SimpleRateThrottle):
     scope = 'sms'
 
     def get_cache_key(self, request, view):
-        # return self.cache_format % {
-        #     'scope': self.scope,
-        #     'ident': self.get_ident(request)
-        # }
-        return super().get_cache_key(request, view)
+        return self.cache_format % {
+            'scope': self.scope,
+            'ident': self.get_ident(request)
+        }
+        

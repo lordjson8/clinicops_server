@@ -26,7 +26,7 @@ build:
 	$(COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) build
 
 up:
-	$(COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) up --build
+	$(COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) up
 
 up-d:
 	$(COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) up -d

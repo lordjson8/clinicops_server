@@ -110,14 +110,14 @@ SIMPLE_JWT = {
     'TOKEN_OBTAIN_SERIALIZER': 'apps.accounts.serializers.CustomTokenObtainPairSerializer',
 }
 
-# Refresh token cookie
 AUTH_COOKIE_NAME = 'refresh_token'
-AUTH_COOKIE_SECURE = True
+AUTH_COOKIE_SECURE = False
 AUTH_COOKIE_HTTP_ONLY = True
 AUTH_COOKIE_SAMESITE = 'Lax'
 AUTH_COOKIE_PATH = '/api/v1/auth/'
 
-# Remember me duration
+
+
 AUTH_REMEMBER_ME_LIFETIME = timedelta(days=30)
 AUTH_DEFAULT_LIFETIME = timedelta(days=7)
 
@@ -272,3 +272,9 @@ CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localho
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+AUTH_COOKIE_NAME = 'refresh'
+AUTH_COOKIE_SECURE = False
+AUTH_COOKIE_HTTP_ONLY,
+AUTH_COOKIE_SAMESITE,
+AUTH_COOKIE_PATH,

@@ -110,16 +110,7 @@ SIMPLE_JWT = {
     'TOKEN_OBTAIN_SERIALIZER': 'apps.accounts.serializers.CustomTokenObtainPairSerializer',
 }
 
-AUTH_COOKIE_NAME = 'refresh_token'
-AUTH_COOKIE_SECURE = False
-AUTH_COOKIE_HTTP_ONLY = True
-AUTH_COOKIE_SAMESITE = 'Lax'
-AUTH_COOKIE_PATH = '/api/v1/auth/'
 
-
-
-AUTH_REMEMBER_ME_LIFETIME = timedelta(days=30)
-AUTH_DEFAULT_LIFETIME = timedelta(days=7)
 
 
 SPECTACULAR_SETTINGS = {
@@ -132,6 +123,7 @@ SPECTACULAR_SETTINGS = {
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -273,8 +265,39 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
-AUTH_COOKIE_NAME = 'refresh'
+# CORS and COOKIES
+
+AUTH_COOKIE_NAME = 'refresh_token'
 AUTH_COOKIE_SECURE = False
-AUTH_COOKIE_HTTP_ONLY,
-AUTH_COOKIE_SAMESITE,
-AUTH_COOKIE_PATH,
+AUTH_COOKIE_HTTP_ONLY = True
+AUTH_COOKIE_SAMESITE = 'Lax'
+AUTH_COOKIE_PATH = '/api/v1/auth/'
+
+
+
+AUTH_REMEMBER_ME_LIFETIME = timedelta(days=30)
+AUTH_DEFAULT_LIFETIME = timedelta(days=7)
+
+
+CORS_ALLOW_CREDENTIALS = True
+
+# CORS_ALLOW_HEADERS = [
+#     'accept',
+#     'accept-encoding',
+#     'authorization',
+#     'content-type',
+#     'dnt',
+#     'origin',
+#     'user-agent',
+#     'x-csrftoken',
+#     'x-requested-with',
+# ]
+
+# CORS_ALLOW_METHODS = [
+#     'DELETE',
+#     'GET',
+#     'OPTIONS',
+#     'PATCH',
+#     'POST',
+#     'PUT',
+# ]

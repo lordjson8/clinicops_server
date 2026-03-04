@@ -57,7 +57,7 @@ class LoginView(GenericAPIView):
     Endpoint to authenticate registered user
     """
     permission_classes = [AllowAny]
-    throttle_classes = [LoginThrottle]
+    # throttle_classes = [LoginThrottle]
     serializer_class = LoginSerializer
 
     def post(self,request):
@@ -226,7 +226,7 @@ class LogoutView(GenericAPIView):
         _delete_refresh_cookie(response)
         return response
     
-class CheckCookieDeletion(GenericAPIView):
+class CheckCookieDeletion(APIView):
     permission_classes = [AllowAny]
 
     """
@@ -236,6 +236,7 @@ class CheckCookieDeletion(GenericAPIView):
     def post(self,request):
         try:
             refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
+            print(refresh_token)
             if refresh_token:
                 print(refresh_token)
                 return Response({

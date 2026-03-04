@@ -10,9 +10,21 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 # Railway (and most cloud platforms) sit behind a reverse proxy that handles SSL.
 # This tells Django to trust the X-Forwarded-Proto header from the proxy.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
+SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+
+CORS_ALLOWED_ORIGINS = [
+    "https://example.com",
+    "http://localhost:3000",  # Example: Allow a frontend running on localhost
+    "http://127.0.0.1:3000",  # Example: Allow a frontend running on localhost
+]
+CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:3000","http://localhost:3000"]
+
+# SESSION_COOKIE_SECURE = False
+# CSRF_COOKIE_SAMESITE = "Lax"
+# CSRF_COOKIE_SECURE = False
+# SESSION_COOKIE_SAMESITE = "Lax"
 
 # --- Database ---
 # Railway provides a DATABASE_URL environment variable when you add a PostgreSQL plugin.
@@ -56,3 +68,13 @@ LOGGING = {
         },
     },
 }
+
+
+REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = ['rest_framework.renderers.JSONRenderer',
+                                            #   'rest_framework.renderers.BrowsableAPIRenderer'
+                                              ]
+AUTH_COOKIE_NAME = 'refresh_token'
+AUTH_COOKIE_SECURE = True
+AUTH_COOKIE_HTTP_ONLY = True
+AUTH_COOKIE_SAMESITE = 'None'
+AUTH_COOKIE_PATH = '/api/v1/auth/'

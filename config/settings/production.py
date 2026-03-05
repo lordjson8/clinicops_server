@@ -14,12 +14,12 @@ SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-CORS_ALLOWED_ORIGINS = [
-    "https://example.com",
-    "http://localhost:3000",  # Example: Allow a frontend running on localhost
-    "http://127.0.0.1:3000",  # Example: Allow a frontend running on localhost
-]
-CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:3000","http://localhost:3000"]
+# CORS_ALLOWED_ORIGINS = [
+#     "https://example.com",
+#     "http://localhost:3000",  # Example: Allow a frontend running on localhost
+#     "http://127.0.0.1:3000",  # Example: Allow a frontend running on localhost
+# ]
+# CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:3000","http://localhost:3000"]
 
 # SESSION_COOKIE_SECURE = False
 # CSRF_COOKIE_SAMESITE = "Lax"

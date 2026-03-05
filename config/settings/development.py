@@ -5,13 +5,13 @@ ALLOWED_HOSTS=['*']
 
 print("development settings loaded")
 
-CORS_ALLOWED_ORIGINS = [
-    "https://example.com",
-    "http://localhost:3000",  # Example: Allow a frontend running on localhost
-    "http://127.0.0.1:3000",  # Example: Allow a frontend running on localhost
-    "http://172.20.0.1:3000",
-]
-CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:3000","http://localhost:3000","http://172.20.0.1:3000"]
+# CORS_ALLOWED_ORIGINS = [
+#     "https://example.com",
+#     "http://localhost:3000",  # Example: Allow a frontend running on localhost
+#     "http://127.0.0.1:3000",  # Example: Allow a frontend running on localhost
+#     "http://172.20.0.1:3000",
+# ]
+# CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:3000","http://localhost:3000","http://172.20.0.1:3000"]
 
 AUTH_COOKIE_NAME = 'refresh_token'
 AUTH_COOKIE_SECURE = False

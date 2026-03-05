@@ -273,8 +273,9 @@ AUTH_DEFAULT_LIFETIME = timedelta(days=7)
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", cast=lambda v: [s.strip() for s in v.split(",")])
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=lambda v: [s.strip() for s in v.split(",")])
+CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS",default="https://clinicops-cm.vercel.app", cast=lambda v: [s.strip() for s in v.split(",")])
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS",default="https://clinicops-cm.vercel.app", cast=lambda v: [s.strip() for s in v.split(",")])
+print(CORS_ALLOWED_ORIGINS,"c")
 
 # CORS_ALLOW_HEADERS = [
 #     'accept',

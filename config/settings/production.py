@@ -73,11 +73,13 @@ LOGGING = {
 REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = ['rest_framework.renderers.JSONRenderer',
                                             #   'rest_framework.renderers.BrowsableAPIRenderer'
                                               ]
+
+
 AUTH_COOKIE_NAME = 'refresh_token'
 AUTH_COOKIE_SECURE = True
 AUTH_COOKIE_HTTP_ONLY = True
 AUTH_COOKIE_SAMESITE = 'None'
-AUTH_COOKIE_PATH = '/api/v1/auth/'
+AUTH_COOKIE_PATH = '/'
 
 ROLE_COOKIE_NAME = 'role'
 ROLE_COOKIE_SECURE = True

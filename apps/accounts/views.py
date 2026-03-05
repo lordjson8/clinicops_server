@@ -23,7 +23,7 @@ from .serializers import (
 from apps.core.throttling import LoginThrottle, RegisterThrottle, SMSThrottle
 from apps.core.utils import normalize_phone, generate_reset_code, send_sms
 
-def _set_refresh_cookie(response, refresh_token, remember_me=False):
+def _set_refresh_cookie(response, refresh_token,role, remember_me=False):
     max_age = 30 * 24 * 3600 if remember_me else 7 * 24 * 3600
 
     response.set_cookie(
@@ -36,10 +36,26 @@ def _set_refresh_cookie(response, refresh_token, remember_me=False):
         path=settings.AUTH_COOKIE_PATH,
     )
 
+    response.set_cookie(
+        key=settings.ROLE_COOKIE_NAME,
+        value=role,
+        max_age=max_age,
+        secure=settings.ROLE_COOKIE_SECURE,
+        httponly=settings.ROLE_COOKIE_HTTP_ONLY,
+        samesite=settings.ROLE_COOKIE_SAMESITE,
+    )
+
+
+
 def _delete_refresh_cookie(response):
     response.delete_cookie(
         key=settings.AUTH_COOKIE_NAME,
         path=settings.AUTH_COOKIE_PATH,
+    )
+
+    response.delete_cookie(
+        key=settings.ROLE_COOKIE_NAME,
+        path=settings.ROLE_COOKIE_PATH,
     )
 
 def _build_refresh_token(user,remember_me = False):
@@ -116,11 +132,10 @@ class LoginView(GenericAPIView):
 
         response = Response({
             'access_token': str(refresh.access_token),
-            "refresh_token": str(refresh),
             'user': UserSerializer(user).data,
         })
 
-        _set_refresh_cookie(response, refresh, remember_me)
+        _set_refresh_cookie(response, refresh, user.role, remember_me)
         return response
 
 
@@ -174,13 +189,12 @@ class RegisterView(GenericAPIView):
             {
                 'message': 'Inscription reussie',
                 'access_token': str(refresh.access_token),
-                "refresh_token": str(refresh),
                 'user': UserSerializer(user).data,
             },
             status=status.HTTP_201_CREATED,
         )
 
-        _set_refresh_cookie(response, refresh, remember_me=False)
+        _set_refresh_cookie(response, refresh, user.role, remember_me=False)
         return response
 
        
@@ -264,35 +278,24 @@ class RefreshTokenView(GenericAPIView):
     """
 
     def post(self, request):
-        cookie_refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        payload_refresh_token = serializer.validated_data.get('refresh', None)
-       
-        if not cookie_refresh_token and not payload_refresh_token:
+        refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
+        
+        if not refresh_token:
             return Response(
                 {'error': 'no_refresh_token', 'message': 'Session expiree. Veuillez vous reconnecter.'},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         
-        if cookie_refresh_token and payload_refresh_token:
-            refresh_token = cookie_refresh_token
-
-        if not cookie_refresh_token and payload_refresh_token:
-            refresh_token = payload_refresh_token
-
-        if cookie_refresh_token and not payload_refresh_token:
-            refresh_token = cookie_refresh_token
-
-        
 
         try:
             old_refresh = RefreshToken(refresh_token)
             print(old_refresh)
-            access_token = str(old_refresh.access_token)
             new_refresh = str(old_refresh)
+            print(new_refresh == old_refresh)
+            access_token = str(old_refresh.access_token)
             print(new_refresh)
-            response = Response({'access_token': access_token, "refresh_token": str(refresh_token)})
+            response = Response({'access_token': access_token})
+            
             response.set_cookie(
                 key=settings.AUTH_COOKIE_NAME,
                 value=new_refresh,
@@ -302,6 +305,16 @@ class RefreshTokenView(GenericAPIView):
                 samesite=settings.AUTH_COOKIE_SAMESITE,
                 path=settings.AUTH_COOKIE_PATH,
             )
+
+            response.set_cookie(
+                key=settings.ROLE_COOKIE_NAME,
+                value=new_refresh,
+                max_age=7 * 24 * 3600,
+                secure=settings.ROLE_COOKIE_SECURE,
+                httponly=settings.ROLE_COOKIE_HTTP_ONLY,
+                samesite=settings.ROLE_COOKIE_SAMESITE,
+            )
+
             return response
 
         except TokenError:

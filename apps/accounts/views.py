@@ -55,7 +55,7 @@ def _delete_refresh_cookie(response):
 
     response.delete_cookie(
         key=settings.ROLE_COOKIE_NAME,
-        path=settings.ROLE_COOKIE_PATH,
+        # path=settings.ROLE_COOKIE_PATH,
     )
 
 def _build_refresh_token(user,remember_me = False):
@@ -289,6 +289,8 @@ class RefreshTokenView(GenericAPIView):
 
         try:
             old_refresh = RefreshToken(refresh_token)
+            role = old_refresh.get("role")
+            print("e ",e)
             print(old_refresh)
             new_refresh = str(old_refresh)
             print(new_refresh == old_refresh)
@@ -308,7 +310,7 @@ class RefreshTokenView(GenericAPIView):
 
             response.set_cookie(
                 key=settings.ROLE_COOKIE_NAME,
-                value=new_refresh,
+                value=role,
                 max_age=7 * 24 * 3600,
                 secure=settings.ROLE_COOKIE_SECURE,
                 httponly=settings.ROLE_COOKIE_HTTP_ONLY,

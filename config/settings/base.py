@@ -275,7 +275,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS",default="https://clinicops-cm.vercel.app", cast=lambda v: [s.strip() for s in v.split(",")])
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS",default="https://clinicops-cm.vercel.app", cast=lambda v: [s.strip() for s in v.split(",")])
-print(CORS_ALLOWED_ORIGINS,"c")
+# APPEND_SLASH=False
 
 # CORS_ALLOW_HEADERS = [
 #     'accept',

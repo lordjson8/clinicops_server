@@ -40,7 +40,7 @@ class AdminRegistrationSerializer(serializers.Serializer):
     firstName = serializers.CharField(max_length=100)
     lastName = serializers.CharField(max_length=100)
     phone = serializers.CharField(max_length=20)
-    email = serializers.EmailField(required=False, default='', allow_blank=True)
+    email = serializers.EmailField(required=False, default=None)
     password = serializers.CharField(min_length=8, write_only=True)
     passwordConfirm = serializers.CharField(write_only=True)
 
@@ -57,12 +57,18 @@ class RegisterSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         phone = attrs['admin']['phone']
+        email = attrs['admin']['email']
         from apps.core.utils import normalize_phone
         normalized = normalize_phone(phone)
-
+        
         if User.objects.filter(phone=normalized).exists():
             raise serializers.ValidationError({
                 'admin': {'phone': ['Un compte avec ce numero existe deja.']}
+            })
+        
+        if User.objects.filter(email=email).exists() and email != None:
+            raise serializers.ValidationError({
+                'admin': {'email': ['Un compte avec cet email existe deja.']}
             })
 
         # Store normalized phone back
@@ -120,5 +126,7 @@ class UpdateProfileSerializer(serializers.Serializer):
         return normalized
     
 
+
+# unused because of cookies
 class TokenSerializer(serializers.Serializer):
     refresh = serializers.CharField(required=False)

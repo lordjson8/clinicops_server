@@ -86,8 +86,12 @@ services:
       - .:/app
     env_file: .env.dev
     depends_on:
-      - redis
-      - postgres
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
     restart: always
 
   migrate:

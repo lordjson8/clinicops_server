@@ -19,7 +19,7 @@ def custom_exception_handler(exc, context):
         return response
 
     # Bad Request(Validation Error) 400
-    if isinstance(response, ValidationError):
+    if response.status_code == status.HTTP_400_BAD_REQUEST:
         error_data = response.data
          
         # If the serializer returned our custom format already

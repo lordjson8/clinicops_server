@@ -7,6 +7,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from django.conf import settings
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_headers,vary_on_cookie
 
 from .models import User
 
@@ -16,56 +19,15 @@ from .serializers import (
     RegisterSerializer,
     TokenSerializer,
     UpdateProfileSerializer,
-    ClinicRegistrationSerializer,
-    AdminRegistrationSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
+    ChangePasswordSerializer
 )
 
 from apps.core.throttling import LoginThrottle, RegisterThrottle, SMSThrottle
-from apps.core.utils import normalize_phone, generate_reset_code, send_sms
-
-def _set_refresh_cookie(response, refresh_token,role, remember_me=False):
-    max_age = 30 * 24 * 3600 if remember_me else 7 * 24 * 3600
-
-    response.set_cookie(
-        key=settings.AUTH_COOKIE_NAME,
-        value=str(refresh_token),
-        max_age=max_age,
-        secure=settings.AUTH_COOKIE_SECURE,
-        httponly=settings.AUTH_COOKIE_HTTP_ONLY,
-        samesite=settings.AUTH_COOKIE_SAMESITE,
-        path=settings.AUTH_COOKIE_PATH,
-    )
-
-    response.set_cookie(
-        key=settings.ROLE_COOKIE_NAME,
-        value=role,
-        max_age=max_age,
-        secure=settings.ROLE_COOKIE_SECURE,
-        httponly=settings.ROLE_COOKIE_HTTP_ONLY,
-        samesite=settings.ROLE_COOKIE_SAMESITE,
-    )
-
-
-
-def _delete_refresh_cookie(response):
-    response.delete_cookie(
-        key=settings.AUTH_COOKIE_NAME,
-        path=settings.AUTH_COOKIE_PATH,
-    )
-
-    response.delete_cookie(
-        key=settings.ROLE_COOKIE_NAME,
-        # path=settings.ROLE_COOKIE_PATH,
-    )
-
-def _build_refresh_token(user,remember_me = False):
-    refresh = RefreshToken.for_user(user)
-
-    refresh['phone'] = user.phone
-    refresh['role'] = user.role
-    refresh['clinic_id'] = str(user.clinic.id)
-    refresh['full_name'] = user.full_name
-    return refresh
+from apps.core.utils import normalize_phone, generate_reset_code
+from .task import send_sms
+from .services import _build_refresh_token,_delete_refresh_cookie, _set_refresh_cookie
 
 class LoginView(GenericAPIView):
     
@@ -89,7 +51,6 @@ class LoginView(GenericAPIView):
             user = User.objects.get(phone=phone)
             
         except User.DoesNotExist:
-            print("hello")
             return Response(
                 {
                     'error': "invalid_credentials", 
@@ -204,31 +165,12 @@ class RegisterView(GenericAPIView):
 class LogoutView(GenericAPIView):
     """
     Endpoint to logout authenticated users, using refresh token through cookies 
-    or refresh token through payload
-    {
-       "refresh" : "" //optional if cookie given
-    } 
     """
     permission_classes = [IsAuthenticated]
-    serializer_class = TokenSerializer
+   
     def post(self,request):
-        cookie_refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        payload_refresh_token = serializer.validated_data.get('refresh', None)
-
-        refresh_token = None
+        refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
         
-        if cookie_refresh_token and payload_refresh_token:
-            refresh_token = cookie_refresh_token
-
-        if not cookie_refresh_token and payload_refresh_token:
-            refresh_token = payload_refresh_token
-
-        if cookie_refresh_token and not payload_refresh_token:
-            refresh_token = cookie_refresh_token
-
-
         try:
             if refresh_token:
                 token = RefreshToken(refresh_token)
@@ -239,6 +181,8 @@ class LogoutView(GenericAPIView):
         response = Response({'message': 'Deconnexion reussie'})
         _delete_refresh_cookie(response)
         return response
+    
+
     
 class CheckCookieDeletion(APIView):
     permission_classes = [AllowAny]
@@ -278,6 +222,7 @@ class RefreshTokenView(GenericAPIView):
     """
 
     def post(self, request):
+
         refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
         
         if not refresh_token:
@@ -290,12 +235,8 @@ class RefreshTokenView(GenericAPIView):
         try:
             old_refresh = RefreshToken(refresh_token)
             role = old_refresh.get("role")
-            print("e ",e)
-            print(old_refresh)
             new_refresh = str(old_refresh)
-            print(new_refresh == old_refresh)
             access_token = str(old_refresh.access_token)
-            print(new_refresh)
             response = Response({'access_token': access_token})
             
             response.set_cookie(
@@ -327,6 +268,104 @@ class RefreshTokenView(GenericAPIView):
             _delete_refresh_cookie(response)
             return response
 
+class PasswordResetRequestView(GenericAPIView):
+    permission_classes = [AllowAny]
+    throttle_scope = 'sms'
+    serializer_class = PasswordResetRequestSerializer
+
+    def post(self,request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        phone = normalize_phone(serializer.validated_data['phone'])
+
+        try:
+
+            user = User.objects.get(phone=phone)
+            code = generate_reset_code()
+            user.set_reset_code(code)
+
+            print(f"[SMS → {user.phone}] {code}")
+           
+            send_sms.delay(to=user.phone, message=f"Votre code de verification ClinicOps: {code}. Valide 15 minutes.") 
+
+        except User.DoesNotExist:
+            pass
+
+        return Response({
+            'message': 'Si ce numero existe, un code de verification a ete envoye',
+            'validity_minutes': 15
+        })
+    
+class PasswordResetConfirmView(GenericAPIView):
+    permission_classes = [AllowAny]
+    serializer_class= PasswordResetConfirmSerializer
+
+    def post(self,request):
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+        phone = normalize_phone(validated_data['phone'])
+        password = validated_data['password']
+        code = validated_data['code']
+
+        try:
+            user = User.objects.get(phone=phone)
+        except User.DoesNotExist: 
+            return Response(
+                {'error': 'invalid_code', 'message': 'Code invalide ou expire'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        print(user.reset_attempts_locked, user.reset_attempts_locked_until)
+        if user.reset_attempts_locked:
+            remaining = max(1,(user.reset_attempts_locked_until - timezone.now()).seconds // 60)
+            return Response(
+                {
+                    'error': "reset_attempts_locked", 
+                    'message': f'Trop de tentative. Reessayez dans {remaining} minutes.',
+                    'lockedUntil': user.reset_attempts_locked_until.isoformat(),
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        if not user.verify_reset_code(code):
+            user.increment_failed_reset_attempts()
+            return Response(
+                {'error': 'invalid_code', 'message': 'Code invalide ou expire'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        user.set_password(password)
+        user.clear_reset_code()
+
+        return Response({'message': 'Mot de passe modifie avec succes'})
+
+class ChangePasswordView(GenericAPIView):
+    
+    permission_classes= [IsAuthenticated]
+    serializer_class = ChangePasswordSerializer
+
+    def post(self,request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        current_password = serializer.validated_data['currentPassword']
+        new_password = serializer.validated_data['newPassword']
+
+        user = request.user
+
+        if not user.check_password(current_password):
+            return Response(
+                {'error': 'invalid_password', 'message': 'Mot de passe actuel incorrect'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.set_password(new_password)
+        user.must_change_password = False
+        user.password_changed_at = timezone.now()
+        user.save()
+
+        return Response({'message': 'Mot de passe modifie avec succes'})
 
 
 class MeView(GenericAPIView):
@@ -334,9 +373,11 @@ class MeView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UpdateProfileSerializer
 
-    
-
+    @method_decorator(cache_page(60 * 15, key_prefix="current_user"))
+    @method_decorator(vary_on_headers("Authorization"))
     def get(self, request):
+        # import time
+        # time.sleep(3)
         return Response(UserSerializer(request.user).data)
 
     def patch(self, request):

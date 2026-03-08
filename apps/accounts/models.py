@@ -28,7 +28,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     # Auth — phone is the login field
     phone = models.CharField(max_length=20, unique=True, db_index=True)
-    email = models.EmailField(blank=True, default='')
+    email = models.EmailField(blank=True, null=True, unique=True)
 
     # Profile
     first_name = models.CharField(max_length=100)
@@ -47,6 +47,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     # Security — login attempts & lockout
     failed_login_attempts = models.IntegerField(default=0)
+    failed_reset_attempts = models.IntegerField(default=0)
+    reset_attempts_locked_until = models.DateTimeField(null=True, blank=True)
     locked_until = models.DateTimeField(null=True, blank=True)
     last_login_ip = models.GenericIPAddressField(null=True, blank=True)
     password_changed_at = models.DateTimeField(null=True, blank=True)
@@ -86,6 +88,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         if self.locked_until and self.locked_until > timezone.now():
             return True
         return False
+    
+    @property
+    def reset_attempts_locked(self):
+        if self.reset_attempts_locked_until and self.reset_attempts_locked_until > timezone.now():
+            return True
+        return False
 
     @property
     def role_level(self):
@@ -118,7 +126,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     def clear_reset_code(self):
         self.reset_code = ''
         self.reset_code_expires = None
-        self.save(update_fields=['reset_code', 'reset_code_expires'])
+        self.must_change_password= False
+        self.reset_failed_attempts()
+        self.password_changed_at= timezone.now()
+        self.save()
 
     def verify_reset_code(self, code):
         if not self.reset_code or not self.reset_code_expires:
@@ -126,3 +137,19 @@ class User(AbstractBaseUser, PermissionsMixin):
         if self.reset_code_expires < timezone.now():
             return False
         return self.reset_code == code
+    
+    def restrict_reset_attempts(self, duration_minutes=15):
+        self.reset_attempts_locked_until = timezone.now() + timedelta(minutes=duration_minutes)
+        self.save(update_fields=['reset_attempts_locked_until'])
+
+    def reset_password_attempts(self):
+        self.failed_reset_attempts = 0
+        self.reset_attempts_locked_until = None
+        self.save(update_fields=['failed_reset_attempts', 'reset_attempts_locked_until'])
+
+    def increment_failed_reset_attempts(self):
+        self.failed_reset_attempts += 1
+        print(self.failed_reset_attempts)
+        if self.failed_reset_attempts >= 5:
+            self.restrict_reset_attempts()
+        self.save(update_fields=['failed_reset_attempts'])

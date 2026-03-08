@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "fb53ac83-1612-4126-8106-779b7edae0c1",
 		"name": "ClinicOps_API",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "40673879"
 	},
 	"item": [
@@ -37,16 +37,7 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{ _.auth_base_url }}/login/",
-							"host": [
-								"{{ _.auth_base_url }}"
-							],
-							"path": [
-								"login",
-								""
-							]
-						}
+						"url": "{{ _.auth_base_url }}/login/"
 					},
 					"response": []
 				},
@@ -78,16 +69,7 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{ _.auth_base_url }}/register/",
-							"host": [
-								"{{ _.auth_base_url }}"
-							],
-							"path": [
-								"register",
-								""
-							]
-						}
+						"url": "{{ _.auth_base_url }}/register/"
 					},
 					"response": []
 				},
@@ -118,7 +100,7 @@
 					"response": []
 				},
 				{
-					"name": "Update Me Copy",
+					"name": "Update Me",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -128,6 +110,30 @@
 				},
 				{
 					"name": "Logout",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password Reset",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Password Reset",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Password Change",
 					"request": {
 						"method": "GET",
 						"header": []
@@ -151,16 +157,7 @@
 						"value": "insomnia/12.0.0"
 					}
 				],
-				"url": {
-					"raw": "{{ _.host }}/health/",
-					"host": [
-						"{{ _.host }}"
-					],
-					"path": [
-						"health",
-						""
-					]
-				},
+				"url": "{{ _.host }}/health/",
 				"description": "Endpoint to ensure the api is running"
 			},
 			"response": []
@@ -177,13 +174,9 @@
 	],
 	"auth": {
 		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{access_token}}",
-				"type": "string"
-			}
-		]
+		"bearer": {
+			"token": "{{access_token}}"
+		}
 	},
 	"event": [
 		{

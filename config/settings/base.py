@@ -315,5 +315,5 @@ AFRICASTALKING = {
     "USERNAME": config("AT_USERNAME", default=''),
     "API_KEY": config("AT_API_KEY", default=''),
     "SENDER_ID": config("AT_SENDER_ID", default=None),
-    "SANDBOX": config.bool("AT_SANDBOX", default=False),
+    "SANDBOX": config("AT_SANDBOX", default=False, cast=bool),
 }

@@ -31,7 +31,7 @@ def _get_sms_service():
     """Lazy init — only hits AT once per process."""
     cfg = settings.AFRICASTALKING
     if cfg.get("SANDBOX"):
-        africastalking.initialize(cfg["USERNAME"], cfg["API_KEY"], True)
+        africastalking.initialize(cfg["USERNAME"], cfg["API_KEY"])
     else:
         africastalking.initialize(cfg["USERNAME"], cfg["API_KEY"])
     return africastalking.SMS

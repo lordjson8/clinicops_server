@@ -26,8 +26,8 @@ from .serializers import (
 
 from apps.core.throttling import LoginThrottle, RegisterThrottle, SMSThrottle
 from apps.core.utils import normalize_phone, generate_reset_code
-from .task import send_sms
-from .services import _build_refresh_token,_delete_refresh_cookie, _set_refresh_cookie
+from .task import queue_sms
+from .services.token import _build_refresh_token,_delete_refresh_cookie, _set_refresh_cookie
 
 class LoginView(GenericAPIView):
     
@@ -285,8 +285,11 @@ class PasswordResetRequestView(GenericAPIView):
             user.set_reset_code(code)
 
             print(f"[SMS → {user.phone}] {code}")
-           
-            send_sms.delay(to=user.phone, message=f"Votre code de verification ClinicOps: {code}. Valide 15 minutes.") 
+            queue_sms(
+                    recipient=user.phone,
+                    message=f"Votre code de verification ClinicOps: {code}. Valide 15 minutes.",
+                    sender_id= "ClinicOps Verification Code"
+                )
 
         except User.DoesNotExist:
             pass

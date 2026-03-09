@@ -1,45 +1,7 @@
+# tasks.py
 from celery import shared_task
-import logging
-from .models import User
 from .models import SMSLog
-
-
-
-logger = logging.getLogger(__name__)
-
-@shared_task
-def send_sms(to, message):
-    """
-    Send an SMS message.
-
-    TODO: Replace with your SMS provider integration.
-    Options for Cameroon:
-      - Africa's Talking
-      - Twilio
-      - Nexmo/Vonage
-      - Local providers
-
-    For development, this just logs the message.
-    """
-    logger.info(f"[SMS → {to}] {message}")
-    print(f"[SMS → {to}] {message}")
-    
-    # ---- PRODUCTION: uncomment your provider ----
-
-    # --- Africa's Talking ---
-    # import africastalking
-    # africastalking.initialize(username='your_username', api_key='your_api_key')
-    # sms = africastalking.SMS
-    # sms.send(message, [to])
-
-    # --- Twilio ---
-    # from twilio.rest import Client
-    # from django.conf import settings
-    # client = Client(settings.TWILIO_SID, settings.TWILIO_AUTH_TOKEN)
-    # client.messages.create(body=message, from_=settings.TWILIO_FROM, to=to)
-
-    return True
-
+from .services.sms import send_sms
 
 @shared_task(
     bind=True,
@@ -49,7 +11,7 @@ def send_sms(to, message):
 )
 def send_sms_task(self, log_id: str) -> None:
     log = SMSLog.objects.get(id=log_id)
-
+    print("hi")
     result = send_sms(
         message=log.message,
         recipients=[log.recipient],
@@ -70,3 +32,22 @@ def send_sms_task(self, log_id: str) -> None:
         log.failure_reason = result.error or "Unknown error"
 
     log.save(update_fields=["status", "at_message_id", "cost", "failure_reason", "updated_at"])
+
+
+def queue_sms(
+    recipient: str,
+    message:   str,
+    sender_id: str | None = None,
+) -> SMSLog:
+    """
+    Create a log entry and enqueue the task.
+    Call this from views, signals, or management commands.
+    """
+    log = SMSLog.objects.create(
+        recipient=recipient,
+        message=message,
+        sender_id=sender_id or settings.AFRICASTALKING.get("SENDER_ID", ""),
+        status=SMSLog.Status.PENDING,
+    )
+    send_sms_task.delay(str(log.id))
+    return log

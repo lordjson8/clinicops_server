@@ -60,3 +60,5 @@ pillow==12.0.0
 # Device & Client Detection
 device_detector==5.0.1
 
+# sms api
+africastalking

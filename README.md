@@ -117,5 +117,5 @@ clinicops-server/
 ├── requirements/   # Python dependency files
 ├── templates/      # Email and document templates
 ├── Makefile        # Command shortcuts
-└── compose.dev.yml # Docker Compose for development
+└── compose.dev.yml # ZXNM,Docker Compose for development
 ```

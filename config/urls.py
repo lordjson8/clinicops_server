@@ -30,7 +30,7 @@ urlpatterns = [
 
    
     # API v1
-    path('api/v1/auth/', include('apps.accounts.urls')),
+    path('api/v1/auth/', include('apps.accounts.urls', namespace='accounts')),
     path('api/v1/clinic/', include('apps.clinics.urls')),
     path('api/v1/services/', include('apps.clinics.service_urls')),
     path('api/v1/staff/', include('apps.accounts.staff_urls')),

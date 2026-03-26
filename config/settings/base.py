@@ -247,15 +247,42 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # DRF SPECTACULAR SETTINGS
 
+SPECTACULAR_TAGS = [
+    { 'name': 'Authentication', 'description': 'Endpoints related to user authentication and token management.' },
+    { 'name': 'Users', 'description': 'Endpoints for managing user accounts and profiles.' },
+    { 'name': 'Clinics', 'description': 'Endpoints for managing clinic information and details.' },
+    { 'name': 'Patients', 'description': 'Endpoints for managing patient records and information.' },
+    { 'name': 'Visits', 'description': 'Endpoints for managing patient visits and appointments.' },
+    { 'name': 'Billing', 'description': 'Endpoints for managing billing and payment information.' },
+    { 'name': 'Reports', 'description': 'Endpoints for generating various reports related to clinic operations.' },
+    { 'name': 'Audit', 'description': 'Endpoints for auditing and logging activities within the system.' },
+]
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'ClinicOps Project API',
     'DESCRIPTION': 'API for managing clinic operations and patient data',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': False,
+    },
+    'SECURITY': [{'bearerAuth': []}],
+    'COMPONENTS': {
+    'securitySchemes': {
+            'bearerAuth': {
+            'type': 'http',
+            'scheme': 'bearer',
+            'bearerFormat': 'JWT',
+            }
+        }
+    },
     # OTHER SETTINGS
     'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
     'REDOC_DIST': 'SIDECAR',
+    'TAGS': SPECTACULAR_TAGS,
 }
 
 

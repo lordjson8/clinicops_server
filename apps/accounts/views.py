@@ -11,6 +11,18 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers,vary_on_cookie
 
+from drf_spectacular.utils import (
+extend_schema,
+OpenApiParameter,
+OpenApiExample,
+OpenApiResponse,
+inline_serializer,
+PolymorphicProxySerializer,
+)
+from drf_spectacular.types import OpenApiTypes
+
+
+
 from .models import User
 
 from .serializers import (
@@ -38,6 +50,20 @@ class LoginView(GenericAPIView):
     # throttle_classes = [LoginThrottle]
     serializer_class = LoginSerializer
 
+    @extend_schema(
+        tags=['Authentication'], summary='Authenticate user', auth=[],
+        request=LoginSerializer,
+        responses={
+        200: OpenApiResponse(description='Login Successful',examples=[
+        OpenApiExample('Success', value={
+        'access_token': 'token here',
+        'user': '',
+        })
+        ]),
+        400: OpenApiResponse(description='Validation error',
+        response=LoginSerializer),
+        },
+    )
     def post(self,request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)

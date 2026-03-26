@@ -73,3 +73,13 @@ SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = "None"
+
+
+# api docs 
+
+SPECTACULAR_SETTINGS['SERVE_AUTHENTICATION_CLASSES'] = [
+'rest_framework_simplejwt.authentication.JWTAuthentication'
+]
+SPECTACULAR_SETTINGS['SERVE_PERMISSIONS'] = [
+'rest_framework.permissions.IsAdminUser'
+]

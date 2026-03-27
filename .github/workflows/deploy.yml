@@ -138,11 +138,11 @@ jobs:
       # They all use the same Dockerfile but different start commands.
       # Replace the service names below with YOUR actual service names from Railway.
 
-      - name: Deploy Web Service
-        run: railway up --detach --service clinicops_server
-        env:
-          RAILWAY_TOKEN: ${{ secrets.ACTIONS_2 }}
-          RAILWAY_PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      # - name: Deploy Web Service
+      #   run: railway up --detach --service clinicops_server
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.ACTIONS_2 }}
+      #     RAILWAY_PROJECT_ID: ${{ secrets.PROJECT_ID }}
       
 
       # - name: Deploy Web Service

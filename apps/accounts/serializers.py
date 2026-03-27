@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 from .models import User
 
@@ -17,6 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     read_only_fields = ['id', 'role', 'clinic', 'mustChangePassword']
 
+    @extend_schema_field({'type': 'object', 'properties': {'id': {'type': 'string'}, 'name': {'type': 'string'}}})
     def get_clinic(self, obj):
         return {
             'id': str(obj.clinic_id),

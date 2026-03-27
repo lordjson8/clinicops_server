@@ -113,13 +113,7 @@ SIMPLE_JWT = {
 
 
 
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Your Project API',
-    'DESCRIPTION': 'Your project description',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-    # OTHER SETTINGS
-}
+# SPECTACULAR_SETTINGS placeholder removed — see main block below
 
 
 MIDDLEWARE = [
@@ -248,14 +242,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # DRF SPECTACULAR SETTINGS
 
 SPECTACULAR_TAGS = [
-    { 'name': 'Authentication', 'description': 'Endpoints related to user authentication and token management.' },
-    { 'name': 'Users', 'description': 'Endpoints for managing user accounts and profiles.' },
-    { 'name': 'Clinics', 'description': 'Endpoints for managing clinic information and details.' },
-    { 'name': 'Patients', 'description': 'Endpoints for managing patient records and information.' },
-    { 'name': 'Visits', 'description': 'Endpoints for managing patient visits and appointments.' },
-    { 'name': 'Billing', 'description': 'Endpoints for managing billing and payment information.' },
-    { 'name': 'Reports', 'description': 'Endpoints for generating various reports related to clinic operations.' },
-    { 'name': 'Audit', 'description': 'Endpoints for auditing and logging activities within the system.' },
+    { 'name': 'Authentication', 'description': 'Login, registration, password reset, token refresh.' },
+    { 'name': 'Settings', 'description': 'User profile and clinic configuration.' },
+    { 'name': 'Clinics', 'description': 'Clinic information and settings.' },
+    { 'name': 'Services', 'description': 'Clinic service catalog (CRUD).' },
+    { 'name': 'Patients', 'description': 'Patient records management.' },
+    { 'name': 'Visits', 'description': 'Patient visits, services, and cancellations.' },
+    { 'name': 'Invoices', 'description': 'Invoice generation and voiding.' },
+    { 'name': 'Payments', 'description': 'Payment recording and voiding.' },
+    { 'name': 'Staff', 'description': 'Staff member management (create, update, activate/deactivate).' },
+    { 'name': 'Reports', 'description': 'Clinic reports and analytics.' },
+    { 'name': 'Audit', 'description': 'Audit logs.' },
 ]
 
 SPECTACULAR_SETTINGS = {
@@ -268,21 +265,21 @@ SPECTACULAR_SETTINGS = {
         'persistAuthorization': True,
         'displayOperationId': False,
     },
-    'SECURITY': [{'bearerAuth': []}],
-    'COMPONENTS': {
-    'securitySchemes': {
-            'bearerAuth': {
-            'type': 'http',
-            'scheme': 'bearer',
-            'bearerFormat': 'JWT',
-            }
-        }
-    },
-    # OTHER SETTINGS
-    'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
+    'SWAGGER_UI_DIST': 'SIDECAR',
     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
     'REDOC_DIST': 'SIDECAR',
     'TAGS': SPECTACULAR_TAGS,
+    'ENUM_NAME_OVERRIDES': {
+        'VisitStatusEnum': 'apps.visits.models.Visit.STATUS_CHOICES',
+        'VisitTypeEnum': 'apps.visits.models.Visit.TYPE_CHOICES',
+        'InvoiceStatusEnum': 'apps.billing.models.Invoice.STATUS_CHOICES',
+        'PaymentMethodEnum': 'apps.billing.models.Payment.METHOD_CHOICES',
+        'PaymentStatusEnum': 'apps.billing.models.Payment.STATUS_CHOICES',
+        'ServiceCategoryEnum': 'apps.clinics.models.Service.CATEGORY_CHOICES',
+        'UserRoleEnum': 'apps.accounts.models.User.ROLE_CHOICES',
+        'StaffRoleEnum': [('admin', 'Administrateur'), ('receptionist', 'Receptionniste'), ('nurse', 'Infirmier(e)')],
+        'GenderEnum': 'apps.patients.models.Patient.GENDER_CHOICES',
+    },
 }
 
 

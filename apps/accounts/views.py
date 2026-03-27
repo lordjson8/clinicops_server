@@ -132,14 +132,16 @@ class LoginView(GenericAPIView):
 
 
 class RegisterView(GenericAPIView):
+    """Register a new clinic owner and their clinic."""
     permission_classes = [AllowAny]
     throttle_classes = [RegisterThrottle]
     serializer_class = RegisterSerializer
 
-    """
-    Endpoint to register clinic owner and the clinic
-    """
-
+    @extend_schema(
+        tags=['Authentication'], summary='Register clinic & owner', auth=[],
+        request=RegisterSerializer,
+        responses={201: OpenApiResponse(description='Registration successful')},
+    )
     def post(self,request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -189,11 +191,13 @@ class RegisterView(GenericAPIView):
 
 
 class LogoutView(GenericAPIView):
-    """
-    Endpoint to logout authenticated users, using refresh token through cookies 
-    """
+    """Logout and blacklist the refresh token."""
     permission_classes = [IsAuthenticated]
-   
+
+    @extend_schema(
+        tags=['Authentication'], summary='Logout', request=None,
+        responses={200: OpenApiResponse(description='Logged out successfully')},
+    )
     def post(self,request):
         refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
         
@@ -210,13 +214,11 @@ class LogoutView(GenericAPIView):
     
 
     
+@extend_schema(exclude=True)
 class CheckCookieDeletion(APIView):
+    """Internal test helper — hidden from docs."""
     permission_classes = [AllowAny]
 
-    """
-    Endpoint for testing if cookies where deleted after sucessfull login
-    """
-    
     def post(self,request):
         try:
             refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
@@ -236,17 +238,14 @@ class CheckCookieDeletion(APIView):
 
 
 class RefreshTokenView(GenericAPIView):
+    """Refresh access token using the refresh cookie."""
     permission_classes = [AllowAny]
     serializer_class = TokenSerializer
 
-    """
-    Endpoint to refresh tokens, using refresh token through cookies 
-    or refresh token through payload
-    {
-       "refresh" : "" //optional if cookie given
-    } 
-    """
-
+    @extend_schema(
+        tags=['Authentication'], summary='Refresh access token', auth=[],
+        responses={200: OpenApiResponse(description='New access token')},
+    )
     def post(self, request):
 
         refresh_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
@@ -295,10 +294,16 @@ class RefreshTokenView(GenericAPIView):
             return response
 
 class PasswordResetRequestView(GenericAPIView):
+    """Request a password reset code via SMS."""
     permission_classes = [AllowAny]
     throttle_scope = 'sms'
     serializer_class = PasswordResetRequestSerializer
 
+    @extend_schema(
+        tags=['Authentication'], summary='Request password reset code', auth=[],
+        request=PasswordResetRequestSerializer,
+        responses={200: OpenApiResponse(description='Code sent if phone exists')},
+    )
     def post(self,request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -326,9 +331,15 @@ class PasswordResetRequestView(GenericAPIView):
         })
     
 class PasswordResetConfirmView(GenericAPIView):
+    """Confirm password reset with the SMS code."""
     permission_classes = [AllowAny]
-    serializer_class= PasswordResetConfirmSerializer
+    serializer_class = PasswordResetConfirmSerializer
 
+    @extend_schema(
+        tags=['Authentication'], summary='Confirm password reset', auth=[],
+        request=PasswordResetConfirmSerializer,
+        responses={200: OpenApiResponse(description='Password changed')},
+    )
     def post(self,request):
 
         serializer = self.serializer_class(data=request.data)
@@ -371,10 +382,15 @@ class PasswordResetConfirmView(GenericAPIView):
         return Response({'message': 'Mot de passe modifie avec succes'})
 
 class ChangePasswordView(GenericAPIView):
-    
-    permission_classes= [IsAuthenticated]
+    """Change password for the authenticated user."""
+    permission_classes = [IsAuthenticated]
     serializer_class = ChangePasswordSerializer
 
+    @extend_schema(
+        tags=['Authentication'], summary='Change password',
+        request=ChangePasswordSerializer,
+        responses={200: OpenApiResponse(description='Password changed')},
+    )
     def post(self,request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -398,17 +414,17 @@ class ChangePasswordView(GenericAPIView):
 
 
 class MeView(GenericAPIView):
-
+    """Get or update the current user's profile."""
     permission_classes = [IsAuthenticated]
     serializer_class = UpdateProfileSerializer
 
+    @extend_schema(tags=['Settings'], summary='Get current user profile', responses={200: UserSerializer})
     @method_decorator(cache_page(60 * 15, key_prefix="current_user"))
     @method_decorator(vary_on_headers("Authorization"))
     def get(self, request):
-        # import time
-        # time.sleep(3)
         return Response(UserSerializer(request.user).data)
 
+    @extend_schema(tags=['Settings'], summary='Update current user profile', request=UpdateProfileSerializer, responses={200: UserSerializer})
     def patch(self, request):
         serializer = UpdateProfileSerializer(
             data=request.data,

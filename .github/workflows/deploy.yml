@@ -139,21 +139,28 @@ jobs:
       # Replace the service names below with YOUR actual service names from Railway.
 
       - name: Deploy Web Service
-        run: railway up --detach --service web
+        run: railway up --detach --service clinicops_server
         env:
-          RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
-          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+          RAILWAY_TOKEN: ${{ secrets.ACTIONS_2 }}
+          RAILWAY_PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      
 
-      - name: Deploy Celery Worker
-        run: railway up --detach --service celery-worker
-        env:
-          RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
-          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+      # - name: Deploy Web Service
+      #   run: railway up --detach --service clinicops_web
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
+      #     RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
 
-      - name: Deploy Celery Beat
-        run: railway up --detach --service celery-beat
-        env:
-          RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
-          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+      # - name: Deploy Celery Worker
+      #   run: railway up --detach --service celery-worker
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
+      #     RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+
+      # - name: Deploy Celery Beat
+      #   run: railway up --detach --service celery-beat
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.ACTIONS }}
+      #     RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
 
 

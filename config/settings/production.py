@@ -5,7 +5,7 @@ from decouple import config
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
-
+print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
 # --- Database ---
 # Railway provides a DATABASE_URL environment variable when you add a PostgreSQL plugin.
 # dj-database-url parses it into the format Django expects.
@@ -77,9 +77,6 @@ CSRF_COOKIE_SAMESITE = "None"
 
 # api docs 
 
-SPECTACULAR_SETTINGS['SERVE_AUTHENTICATION_CLASSES'] = [
-'rest_framework_simplejwt.authentication.JWTAuthentication'
-]
 SPECTACULAR_SETTINGS['SERVE_PERMISSIONS'] = [
-'rest_framework.permissions.IsAdminUser'
+'rest_framework.permissions.AllowAny'
 ]

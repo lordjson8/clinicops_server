@@ -4,13 +4,14 @@ from django.db import models
 from apps.core.models import SoftDeleteModel
 
 
+# apps/patients/models.py
 class Patient(SoftDeleteModel):
     GENDER_CHOICES = [('M', 'Male'), ('F', 'Female'), ('O', 'Other')]
 
     clinic = models.ForeignKey(
         'clinics.Clinic', on_delete=models.CASCADE, related_name='patients',
     )
-    patient_id = models.CharField(max_length=20, unique=True, editable=False)
+    patient_id = models.CharField(max_length=20, editable=False)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     phone = models.CharField(max_length=20)
@@ -29,6 +30,9 @@ class Patient(SoftDeleteModel):
 
     class Meta:
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(fields=['clinic', 'patient_id'], name='uniq_patient_id_per_clinic'),
+        ]
         indexes = [
             models.Index(fields=['clinic', 'phone']),
             models.Index(fields=['clinic', 'patient_id']),
@@ -37,8 +41,15 @@ class Patient(SoftDeleteModel):
 
     def save(self, *args, **kwargs):
         if not self.patient_id:
+            from django.db import transaction
+            from apps.clinics.models import Clinic
             from apps.core.id_generators import generate_patient_id
-            self.patient_id = generate_patient_id(self.clinic_id)
+
+            with transaction.atomic():
+                Clinic.objects.select_for_update().get(pk=self.clinic_id)
+                self.patient_id = generate_patient_id(self.clinic_id)
+                super().save(*args, **kwargs)
+                return
         super().save(*args, **kwargs)
 
     @property

@@ -31,6 +31,7 @@ def create_invoice_from_visit(visit, created_by, discount_percent=0, discount_am
 
     calc_discount = min(calc_discount, subtotal)
     total = subtotal - calc_discount
+    print("invoice")
 
     invoice = Invoice.objects.create(
         invoice_number=generate_invoice_number(visit.clinic_id),
@@ -47,6 +48,7 @@ def create_invoice_from_visit(visit, created_by, discount_percent=0, discount_am
         status='pending',
         created_by=created_by,
     )
+    print(invoice)
 
     for vs in visit_services:
         price = vs.price_override if vs.price_override is not None else vs.unit_price

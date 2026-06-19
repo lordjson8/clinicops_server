@@ -60,8 +60,13 @@ def generate_invoice_number(clinic_id):
         .values_list('invoice_number', flat=True)
         .first()
     )
+    print(last)
+
+    print(last)
 
     seq = int(last.split('-')[-1]) + 1 if last else 1
+    print(f'{prefix}{seq:04d}')
+    print(seq)
     return f'{prefix}{seq:04d}'
 
 
@@ -81,6 +86,6 @@ def generate_payment_id(clinic_id):
         .values_list('payment_id', flat=True)
         .first()
     )
-
+    print("last")
     seq = int(last.split('-')[-1]) + 1 if last else 1
     return f'{prefix}{seq:04d}'

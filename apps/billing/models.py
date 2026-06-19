@@ -12,7 +12,7 @@ class Invoice(TimestampedModel):
         ('cancelled', 'Annule'),
     ]
 
-    invoice_number = models.CharField(max_length=20, unique=True, editable=False)
+    invoice_number = models.CharField(max_length=20, editable=False)
     visit = models.OneToOneField(
         'visits.Visit', on_delete=models.PROTECT, related_name='invoice',
     )
@@ -49,6 +49,9 @@ class Invoice(TimestampedModel):
     class Meta:
         db_table = 'invoices'
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(fields=['clinic', 'invoice_number'], name='uniq_invoice_number_per_clinic'),
+        ]
         indexes = [
             models.Index(fields=['clinic', 'status']),
             models.Index(fields=['clinic', 'patient']),

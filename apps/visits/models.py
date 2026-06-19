@@ -19,7 +19,7 @@ class Visit(TimestampedModel):
         ('cancelled', 'Annule'),
     ]
 
-    visit_id = models.CharField(max_length=20, unique=True, editable=False)
+    visit_id = models.CharField(max_length=20, editable=False)
     clinic = models.ForeignKey(
         'clinics.Clinic', on_delete=models.CASCADE, related_name='visits',
     )
@@ -45,12 +45,17 @@ class Visit(TimestampedModel):
     class Meta:
         db_table = 'visits'
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(fields=['clinic', 'visit_id'], name='uniq_visit_id_per_clinic'),
+        ]
         indexes = [
             models.Index(fields=['clinic', 'status']),
             models.Index(fields=['clinic', 'patient']),
             models.Index(fields=['clinic', '-created_at']),
         ]
 
+        
+   
     def save(self, *args, **kwargs):
         if not self.visit_id:
             from apps.core.id_generators import generate_visit_id
